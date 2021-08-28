@@ -11,7 +11,7 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreen extends State<SignInScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool _validateEmail = false, _validatePassword = false;
+  String errorEmail = "", errorPassword = "";
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +25,14 @@ class _SignInScreen extends State<SignInScreen> {
                 controller: emailController,
                 onChanged: (text) {
                   setState(() {
-                    text.isNotEmpty ? _validateEmail = false : null;
+                    errorEmail = "";
                   });
                 },
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Email',
                   hintText: 'Enter Email',
-                  errorText: _validateEmail ? 'Email can\'t be null' : null,
+                  errorText: errorEmail.isNotEmpty ? errorEmail : null,
                 )),
           ),
           Container(
@@ -41,15 +41,14 @@ class _SignInScreen extends State<SignInScreen> {
                 controller: passwordController,
                 onChanged: (text) {
                   setState(() {
-                    text.isNotEmpty ? _validatePassword = false : null;
+                    errorPassword = "";
                   });
                 },
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Password',
                   hintText: 'Enter Password',
-                  errorText:
-                      _validatePassword ? 'Password can\'t be null' : null,
+                  errorText: errorPassword.isNotEmpty ? errorPassword : null,
                 )),
           ),
           Container(
@@ -61,42 +60,51 @@ class _SignInScreen extends State<SignInScreen> {
               onPressed: () {
                 setState(() {
                   emailController.text.isEmpty
-                      ? _validateEmail = true
-                      : _validateEmail = false;
+                      ? errorEmail = "Email can't be null"
+                      : null;
                   passwordController.text.isEmpty
-                      ? _validatePassword = true
-                      : _validatePassword = false;
-                  if (_validateEmail == false && _validatePassword == false) {
+                      ? errorPassword = "Password can't be null"
+                      : null;
+                  if (emailController.text.isNotEmpty &&
+                      passwordController.text.isNotEmpty) {
                     bool emailValid = RegExp(
-                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                         .hasMatch(emailController.text);
                     bool passwordValid = passwordController.text.length >= 6;
-                    if (emailValid == true && passwordValid == true) {
-                      // set up the AlertDialog
-                      AlertDialog alert = AlertDialog(
-                        title: Text("User ID - ${emailController.text}"),
-                        content: Text(
-                            "${emailController.text} \nPassword : ${passwordController.text}"),
-                        actions: [
-                          FlatButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text("okay"),
-                          )
-                        ],
-                      );
-
-                      // show the dialog
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return alert;
-                        },
-                      );
+                    if (emailValid == true) {
+                      if (passwordValid == true) {
+                        print("Email and Password valid");
+                        AlertDialog alert = AlertDialog(
+                          title: Text("User ID - ${emailController.text}"),
+                          content: Text(
+                              "${emailController.text} \nPassword : ${passwordController.text}"),
+                          actions: [
+                            FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text("okay"),
+                            )
+                          ],
+                        );
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return alert;
+                          },
+                        );
+                      } else {
+                        setState(() {
+                          errorPassword =
+                              "Password must be greater or equal to 6 letter";
+                        });
+                      }
+                    } else {
+                      setState(() {
+                        errorEmail = "Enter Correct Email";
+                      });
                     }
                   }
-
                 });
               },
             ),

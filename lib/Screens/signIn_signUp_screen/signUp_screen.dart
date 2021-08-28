@@ -10,14 +10,14 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  TextEditingController userIdController = TextEditingController();
   TextEditingController nameController = TextEditingController();
+  TextEditingController mobileNumberController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool _validateName = false,
-      _validateUserId = false,
-      _validateEmail = false,
-      _validatePassword = false;
+  String errorName = "",
+      errorMobileNumber = "",
+      errorEmail = "",
+      errorPassword = "";
 
   @override
   Widget build(BuildContext context) {
@@ -32,39 +32,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Container(
                 padding: EdgeInsets.all(15),
                 child: TextField(
-                  controller: userIdController,
-                  onChanged: (text) {
-                    setState(() {
-                      text.isNotEmpty ? _validateUserId = false : null;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'User ID',
-                    hintText: 'Enter User ID',
-                    errorText:
-                        _validateUserId ? 'User Id can\'t be null' : null,
-                  ),
-                  // onChanged: (text){
-                  //
-                  // },
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(15),
-                child: TextField(
                     controller: nameController,
                     onChanged: (text) {
                       setState(() {
-                        text.isNotEmpty ? _validateName = false : null;
+                        errorName = "";
                       });
                     },
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Full Name',
                       hintText: 'Enter Full Name',
-                      errorText: _validateName ? 'Name can\'t be null' : null,
+                      errorText: errorName.isNotEmpty ? errorName : null,
                     )),
+              ),
+              Container(
+                padding: EdgeInsets.all(15),
+                child: TextField(
+                  controller: mobileNumberController,
+                  onChanged: (text) {
+                    setState(() {
+                      errorMobileNumber = "";
+                    });
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Mobile Number',
+                    hintText: 'Enter Mobile Number',
+                    errorText:
+                        errorMobileNumber.isNotEmpty ? errorMobileNumber : null,
+                  ),
+                ),
               ),
               Container(
                 padding: EdgeInsets.all(15),
@@ -72,14 +70,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: emailController,
                     onChanged: (text) {
                       setState(() {
-                        text.isNotEmpty ? _validateEmail = false : null;
+                        errorEmail = "";
                       });
                     },
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Email',
                       hintText: 'Enter Email',
-                      errorText: _validateEmail ? 'Email can\'t be null' : null,
+                      errorText: errorEmail.isNotEmpty ? errorEmail : null,
                     )),
               ),
               Container(
@@ -88,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: passwordController,
                     onChanged: (text) {
                       setState(() {
-                        text.isNotEmpty ? _validatePassword = false : null;
+                        errorPassword = "";
                       });
                     },
                     decoration: InputDecoration(
@@ -96,7 +94,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       labelText: 'Password',
                       hintText: 'Enter Password',
                       errorText:
-                          _validatePassword ? 'Password can\'t be null' : null,
+                          errorPassword.isNotEmpty ? errorPassword : null,
                     )),
               ),
               Container(
@@ -107,50 +105,66 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Text('Sign Up'),
                   onPressed: () {
                     setState(() {
-                      userIdController.text.isEmpty
-                          ? _validateUserId = true
-                          : _validateUserId = false;
                       nameController.text.isEmpty
-                          ? _validateName = true
-                          : _validateName = false;
+                          ? errorName = "Name can't be null"
+                          : null;
+                      mobileNumberController.text.isEmpty
+                          ? errorMobileNumber = "UserId can't be null"
+                          : null;
                       emailController.text.isEmpty
-                          ? _validateEmail = true
-                          : _validateEmail = false;
+                          ? errorEmail = "Email can't be null"
+                          : null;
                       passwordController.text.isEmpty
-                          ? _validatePassword = true
-                          : _validatePassword = false;
-                      if (_validateUserId == false &&
-                          _validateName == false &&
-                          _validateEmail == false &&
-                          _validatePassword == false) {
+                          ? errorPassword = "Password can't be null"
+                          : null;
+                      if (mobileNumberController.text.isNotEmpty &&
+                          nameController.text.isNotEmpty &&
+                          emailController.text.isNotEmpty &&
+                          passwordController.text.isNotEmpty) {
                         bool emailValid = RegExp(
                                 r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                             .hasMatch(emailController.text);
                         bool passwordValid =
                             passwordController.text.length >= 6;
-                        if (emailValid == true && passwordValid == true) {
-                          // set up the AlertDialog
-                          AlertDialog alert = AlertDialog(
-                            title: Text("ID - ${userIdController.text}"),
-                            content: Text(
-                                "Name : ${nameController.text} \nEmail : ${emailController.text} \nPassword : ${passwordController.text}"),
-                            actions: [
-                              FlatButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
+                        if (mobileNumberController.text.length == 10) {
+                          if (emailValid == true) {
+                            if (passwordValid == true) {
+                              AlertDialog alert = AlertDialog(
+                                title:
+                                    Text("ID - ${mobileNumberController.text}"),
+                                content: Text(
+                                    "Name : ${nameController.text} \nEmail : ${emailController.text} \nPassword : ${passwordController.text}"),
+                                actions: [
+                                  FlatButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("okay"),
+                                  )
+                                ],
+                              );
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return alert;
                                 },
-                                child: Text("okay"),
-                              )
-                            ],
-                          );
-
-                          // show the dialog
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return alert;
-                            },
-                          );
+                              );
+                            } else {
+                              setState(() {
+                                errorPassword =
+                                    "Password must be greater or equal to 6 letter";
+                              });
+                            }
+                          } else {
+                            setState(() {
+                              errorEmail = "Enter Correct Email";
+                            });
+                          }
+                        } else {
+                          setState(() {
+                            errorMobileNumber =
+                                "Mobile Number can't be less or more then 10 digit";
+                          });
                         }
                       }
                     });
